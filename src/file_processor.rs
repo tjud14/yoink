@@ -52,11 +52,33 @@ impl FileProcessor {
     }
 
     fn add_directory_structure(&self, buffer: &mut String) -> Result<(), String> {
+        // Create a PathBuf to handle special characters properly
         let base_path = PathBuf::from(&self.config.path);
+        
+        // Check if path exists before processing
+        if !base_path.exists() {
+            return Err(format!("Path does not exist: {}", base_path.display()));
+        }
+        
         let entries: Vec<_> = WalkDir::new(&base_path)
             .into_iter()
-            .filter_map(Result::ok)
-            .filter(|e| self.should_include_in_tree(e))
+            .filter_map(|e| {
+                match e {
+                    Ok(entry) => {
+                        if self.should_include_in_tree(&entry) {
+                            Some(entry)
+                        } else {
+                            None
+                        }
+                    },
+                    Err(err) => {
+                        if self.config.verbose {
+                            eprintln!("Error accessing path: {}", err);
+                        }
+                        None
+                    }
+                }
+            })
             .collect();
 
         // Sort entries to get a consistent tree view
@@ -157,13 +179,38 @@ impl FileProcessor {
     }
 
     fn collect_files(&self) -> Vec<walkdir::DirEntry> {
-        WalkDir::new(&self.config.path)
+        // Use PathBuf to properly handle special characters
+        let path = std::path::PathBuf::from(&self.config.path);
+        
+        // Check if path exists before walking
+        if !path.exists() {
+            if self.config.verbose {
+                eprintln!("Path does not exist: {}", path.display());
+            }
+            return Vec::new();
+        }
+        
+        WalkDir::new(path)
             .max_depth(self.config.max_depth as usize)
             .follow_links(false)
             .into_iter()
-            .filter_map(Result::ok)
-            .filter(|e| !e.file_type().is_dir())
-            .filter(|e| self.should_process_file(e))
+            .filter_map(|entry| {
+                match entry {
+                    Ok(e) => {
+                        if !e.file_type().is_dir() && self.should_process_file(&e) {
+                            Some(e)
+                        } else {
+                            None
+                        }
+                    },
+                    Err(err) => {
+                        if self.config.verbose {
+                            eprintln!("Error accessing path: {}", err);
+                        }
+                        None
+                    }
+                }
+            })
             .collect()
     }
 

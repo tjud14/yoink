@@ -8,7 +8,13 @@ use file_processor::FileProcessor;
 
 fn main() {
     let matches = cli::build_cli().get_matches();
-    let config = cli::Config::from_matches(&matches);
+    let mut config = cli::Config::from_matches(&matches);
+    
+    // Expand any environment variables and tilde (~) in the path
+    if let Ok(expanded_path) = shellexpand::full(&config.path) {
+        config.path = expanded_path.into_owned();
+    }
+    
     let mut processor = FileProcessor::new(config);
     
     match processor.process() {
@@ -17,7 +23,6 @@ fn main() {
                 println!("{}", "No files found".yellow());
                 return;
             }
-
             println!(
                 "{} {} {} {}",
                 "✨".green(),
