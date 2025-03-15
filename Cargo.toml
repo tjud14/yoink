@@ -12,11 +12,15 @@ glob = "0.3"
 encode_unicode = "1.0.0"
 unicode-width = "0.1.11"
 shellexpand = "3.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "5.0"
+infer = "0.15"
+rayon = "1.8"
 
 [dependencies.windows-sys]
 version = "0.52"
-features = [
-    "Win32_Foundation",
-    "Win32_System_Threading",
-    "Win32_Security"
-]
+features = ["Win32_Foundation", "Win32_System_Threading", "Win32_Security"]
+
+[dev-dependencies]
+tempfile = "3.8"

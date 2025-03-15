@@ -1,0 +1,20 @@
+pkgbase = yoink
+	pkgdesc = Command-line utility for recursively copying directory structure & file contents to your clipboard
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/tjud14/yoink
+	arch = x86_64
+	arch = aarch64
+	license = GPL3
+	makedepends = cargo
+	makedepends = git
+	depends = gcc-libs
+	depends = xclip
+	optdepends = wl-clipboard: For Wayland support
+	optdepends = xsel: Alternative X11 clipboard manager
+	optdepends = xdotool: Fallback clipboard method
+	optdepends = termux-api: For Android/Termux support
+	source = git+https://github.com/tjud14/yoink.git
+	sha256sums = SKIP
+
+pkgname = yoink 
